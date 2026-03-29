@@ -1,14 +1,15 @@
 "use client"
 
-import { Home, AlertCircle, Utensils, BookOpen, Gamepad2, Users } from "lucide-react"
+import { Home, AlertCircle, Utensils, BookOpen } from "lucide-react"
 
 const navigationItems = [
   { id: "home", label: "Inicio", icon: Home },
   { id: "alerts", label: "Alerta y Concienzación", icon: AlertCircle },
   { id: "recipes", label: "Recetas Saludables", icon: Utensils },
   { id: "education", label: "Guías de Educación", icon: BookOpen },
-  { id: "games", label: "Juegos", icon: Gamepad2 },
-  { id: "community", label: "Interacción Comunitaria", icon: Users },
+  // Secciones ocultas por solicitud del usuario
+  // { id: "games", label: "Juegos", icon: Gamepad2 },
+  // { id: "community", label: "Interacción Comunitaria", icon: Users },
 ]
 
 const quickFilters = [
@@ -46,9 +47,10 @@ export default function Sidebar({
         })}
       </nav>
 
-      {/* Quick Filters */}
+      {/* Quick Filters - Oculto por solicitud del usuario */}
+      {/* 
       <div className="p-3 border-t border-border">
-        <h3 className="text-xs font-bold text-gray-600 px-3 py-2 uppercase">Filtros Rápidos</h3>
+        <h3 className="text-xs font-bold text-gray-600 px-3 py-2 uppercase">Filtros Rapidos</h3>
         <div className="space-y-2">
           {quickFilters.map((filter) => (
             <label
@@ -61,6 +63,7 @@ export default function Sidebar({
           ))}
         </div>
       </div>
+      */}
     </aside>
   )
 }
