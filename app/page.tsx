@@ -25,7 +25,7 @@ export default function Page() {
       case "games":
         return <Games />
       case "alerts":
-        return <Alerts />
+        return <Alerts onNavigate={setCurrentPage} />
       default:
         return <Home />
     }
