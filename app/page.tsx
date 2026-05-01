@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import Layout from "@/components/layout"
-import Home from "@/components/pages/home"
-import Recipes from "@/components/pages/recipes"
-import Community from "@/components/pages/community"
-import Education from "@/components/pages/education"
-import Games from "@/components/pages/games"
-import Alerts from "@/components/pages/alerts"
+import Layout from "@/frontend/shared/components/layout"
+import Home from "@/frontend/modules/pages/home"
+import Recipes from "@/frontend/modules/pages/recipes"
+import Community from "@/frontend/modules/pages/community"
+import Education from "@/frontend/modules/pages/education"
+import Games from "@/frontend/modules/pages/games"
+import Alerts from "@/frontend/modules/pages/alerts"
 
 export default function Page() {
   const [currentPage, setCurrentPage] = useState("home")
