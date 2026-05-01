@@ -8,9 +8,9 @@ export interface TestimonialData {
   quote: string
   rating: number
   achievement: string
+  categoria_id: string
 }
 
-// Store temporal en memoria (solo para desarrollo/demo)
 const testimonialMemoryStore: (TestimonialData & { id: string; created_at: string })[] = []
 
 export async function createTestimonial(data: TestimonialData) {
@@ -35,7 +35,12 @@ export async function createTestimonial(data: TestimonialData) {
     const { data: testimonial, error } = await supabase
       .from("testimonios")
       .insert({
-        ...data,
+        name: data.name,
+        role: data.role,
+        quote: data.quote,
+        rating: data.rating,
+        achievement: data.achievement,
+        categoria_id: data.categoria_id,
         user_id: user?.id || null,
       })
       .select()

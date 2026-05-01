@@ -6,6 +6,12 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 // TIPOS
 // =====================================================
 
+export interface Categoria {
+  id: string
+  nombre: string
+  descripcion: string | null
+}
+
 export interface VideoEducativo {
   id: string
   titulo: string
@@ -14,7 +20,7 @@ export interface VideoEducativo {
   tipo_autor: "Nutricionista" | "Pediatra"
   duracion: string
   youtube_url: string | null
-  categoria: string | null
+  categoria_id: string | null
   created_at: string
 }
 
@@ -24,7 +30,7 @@ export interface ArticuloInformativo {
   descripcion: string
   contenido: string
   tiempo_lectura: string
-  categoria: string | null
+  categoria_id: string | null
   imagen_url: string | null
   created_at: string
 }
@@ -35,7 +41,8 @@ export interface Receta {
   descripcion: string
   tiempo_preparacion: number
   porciones: number
-  categoria: "Desayuno" | "Almuerzo" | "Cena" | "Snack"
+  tipo_comida: "Desayuno" | "Almuerzo" | "Cena" | "Snack"
+  categoria_id: string | null
   imagen_url: string | null
   calificacion: number
   dificultad: string
@@ -45,15 +52,63 @@ export interface Receta {
 }
 
 // =====================================================
+// CATEGORIAS
+// =====================================================
+
+export async function getCategorias(): Promise<{ data: Categoria[] | null; error: string | null }> {
+  try {
+    const supabase = await createServerSupabaseClient()
+
+    if (!supabase) {
+      return {
+        data: [
+          { id: "1", nombre: "Nutricion Infantil", descripcion: "Contenido sobre alimentacion saludable infantil" },
+          { id: "2", nombre: "Obesidad Infantil", descripcion: "Prevencion y manejo de obesidad infantil" },
+          { id: "3", nombre: "Habitos Saludables", descripcion: "Educacion sobre buenos habitos alimenticios" },
+          { id: "4", nombre: "Lactancia", descripcion: "Contenido relacionado con lactancia y nutricion temprana" },
+          { id: "5", nombre: "Vitaminas y Nutrientes", descripcion: "Informacion sobre vitaminas y nutrientes esenciales" },
+          { id: "6", nombre: "Testimonios", descripcion: "Experiencias de padres y familias" },
+          { id: "7", nombre: "Recetas Saludables", descripcion: "Recetas enfocadas en alimentacion saludable" },
+          { id: "8", nombre: "Educacion Alimentaria", descripcion: "Contenido educativo para padres y niños" },
+        ],
+        error: null
+      }
+    }
+
+    const { data, error } = await supabase
+      .from("categorias")
+      .select("*")
+      .order("nombre", { ascending: true })
+
+    if (error) throw error
+    return { data, error: null }
+  } catch (error) {
+    console.error("[v0] Error fetching categorias:", error)
+    return {
+      data: [
+        { id: "1", nombre: "Nutricion Infantil", descripcion: "Contenido sobre alimentacion saludable infantil" },
+        { id: "2", nombre: "Obesidad Infantil", descripcion: "Prevencion y manejo de obesidad infantil" },
+        { id: "3", nombre: "Habitos Saludables", descripcion: "Educacion sobre buenos habitos alimenticios" },
+        { id: "4", nombre: "Lactancia", descripcion: "Contenido relacionado con lactancia y nutricion temprana" },
+        { id: "5", nombre: "Vitaminas y Nutrientes", descripcion: "Informacion sobre vitaminas y nutrientes esenciales" },
+        { id: "6", nombre: "Testimonios", descripcion: "Experiencias de padres y familias" },
+        { id: "7", nombre: "Recetas Saludables", descripcion: "Recetas enfocadas en alimentacion saludable" },
+        { id: "8", nombre: "Educacion Alimentaria", descripcion: "Contenido educativo para padres y niños" },
+      ],
+      error: null
+    }
+  }
+}
+
+// =====================================================
 // VIDEOS EDUCATIVOS
 // =====================================================
 
 export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | null; error: string | null }> {
   try {
     const supabase = await createServerSupabaseClient()
-    
+
     if (!supabase) {
-      // Retornar datos de ejemplo si no hay conexion
       return {
         data: [
           {
@@ -64,7 +119,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
             tipo_autor: "Nutricionista",
             duracion: "10:45",
             youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-            categoria: "Educacion",
+            categoria_id: "1",
             created_at: new Date().toISOString()
           },
           {
@@ -75,7 +130,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
             tipo_autor: "Nutricionista",
             duracion: "8:30",
             youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-            categoria: "Prevencion",
+            categoria_id: "2",
             created_at: new Date().toISOString()
           },
           {
@@ -86,7 +141,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
             tipo_autor: "Nutricionista",
             duracion: "12:15",
             youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-            categoria: "Consejos",
+            categoria_id: "3",
             created_at: new Date().toISOString()
           },
           {
@@ -97,7 +152,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
             tipo_autor: "Pediatra",
             duracion: "14:30",
             youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-            categoria: "Salud",
+            categoria_id: "1",
             created_at: new Date().toISOString()
           },
           {
@@ -108,7 +163,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
             tipo_autor: "Pediatra",
             duracion: "9:45",
             youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-            categoria: "Prevencion",
+            categoria_id: "2",
             created_at: new Date().toISOString()
           },
           {
@@ -119,7 +174,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
             tipo_autor: "Pediatra",
             duracion: "11:20",
             youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-            categoria: "Habitos",
+            categoria_id: "3",
             created_at: new Date().toISOString()
           }
         ],
@@ -136,7 +191,6 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
     return { data, error: null }
   } catch (error) {
     console.error("[v0] Error fetching videos:", error)
-    // Retornar datos de ejemplo en caso de error
     return {
       data: [
         {
@@ -147,7 +201,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
           tipo_autor: "Nutricionista" as const,
           duracion: "10:45",
           youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-          categoria: "Educacion",
+          categoria_id: "1",
           created_at: new Date().toISOString()
         },
         {
@@ -158,7 +212,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
           tipo_autor: "Nutricionista" as const,
           duracion: "8:30",
           youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-          categoria: "Prevencion",
+          categoria_id: "2",
           created_at: new Date().toISOString()
         },
         {
@@ -169,7 +223,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
           tipo_autor: "Pediatra" as const,
           duracion: "14:30",
           youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-          categoria: "Salud",
+          categoria_id: "1",
           created_at: new Date().toISOString()
         },
         {
@@ -180,7 +234,7 @@ export async function getVideosEducativos(): Promise<{ data: VideoEducativo[] | 
           tipo_autor: "Pediatra" as const,
           duracion: "9:45",
           youtube_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-          categoria: "Prevencion",
+          categoria_id: "2",
           created_at: new Date().toISOString()
         }
       ],
@@ -196,16 +250,24 @@ export async function createVideoEducativo(formData: {
   tipo_autor: "Nutricionista" | "Pediatra"
   duracion: string
   youtube_url: string
-  categoria: string
+  categoria_id: string
 }): Promise<{ success: boolean; error: string | null }> {
   try {
     const supabase = await createServerSupabaseClient()
-    
+
     if (!supabase) {
-      return { success: true, error: null } // Simulacion sin BD
+      return { success: true, error: null }
     }
 
-    const { error } = await supabase.from("videos_educativos").insert([formData])
+    const { error } = await supabase.from("videos_educativos").insert([{
+      titulo: formData.titulo,
+      descripcion: formData.descripcion,
+      autor: formData.autor,
+      tipo_autor: formData.tipo_autor,
+      duracion: formData.duracion,
+      youtube_url: formData.youtube_url,
+      categoria_id: formData.categoria_id
+    }])
 
     if (error) throw error
     return { success: true, error: null }
@@ -222,9 +284,8 @@ export async function createVideoEducativo(formData: {
 export async function getArticulosInformativos(): Promise<{ data: ArticuloInformativo[] | null; error: string | null }> {
   try {
     const supabase = await createServerSupabaseClient()
-    
+
     if (!supabase) {
-      // Datos de ejemplo
       return {
         data: [
           {
@@ -233,7 +294,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
             descripcion: "Estudios recientes demuestran que el consumo excesivo de azucar puede afectar el desarrollo cognitivo y fisico de los ninos.",
             contenido: "El azucar es uno de los ingredientes mas comunes en la dieta moderna...",
             tiempo_lectura: "5 min lectura",
-            categoria: "Nutricion",
+            categoria_id: "1",
             imagen_url: null,
             created_at: new Date().toISOString()
           },
@@ -243,7 +304,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
             descripcion: "Muchos productos dirigidos a ninos contienen cantidades alarmantes de azucar, sodio y aditivos quimicos.",
             contenido: "Los alimentos procesados se han convertido en una parte importante...",
             tiempo_lectura: "4 min lectura",
-            categoria: "Salud",
+            categoria_id: "2",
             imagen_url: null,
             created_at: new Date().toISOString()
           },
@@ -253,7 +314,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
             descripcion: "Aprende a identificar ingredientes nocivos y a tomar decisiones informadas en el supermercado.",
             contenido: "Saber leer las etiquetas nutricionales es una habilidad esencial...",
             tiempo_lectura: "6 min lectura",
-            categoria: "Educacion",
+            categoria_id: "8",
             imagen_url: null,
             created_at: new Date().toISOString()
           },
@@ -263,7 +324,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
             descripcion: "Descubre opciones nutritivas que les encantaran a tus hijos sin comprometer su salud.",
             contenido: "Los snacks son una parte importante de la alimentacion infantil...",
             tiempo_lectura: "5 min lectura",
-            categoria: "Recetas",
+            categoria_id: "7",
             imagen_url: null,
             created_at: new Date().toISOString()
           }
@@ -281,7 +342,6 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
     return { data, error: null }
   } catch (error) {
     console.error("[v0] Error fetching articulos:", error)
-    // Retornar datos de ejemplo en caso de error
     return {
       data: [
         {
@@ -290,7 +350,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
           descripcion: "Estudios recientes demuestran que el consumo excesivo de azucar puede afectar el desarrollo cognitivo y fisico de los ninos.",
           contenido: "El azucar es uno de los ingredientes mas comunes en la dieta moderna. Sin embargo, su consumo excesivo puede tener efectos negativos en la salud de los ninos, incluyendo problemas de concentracion, hiperactividad y aumento de peso. Los expertos recomiendan limitar el consumo de azucar a menos de 25 gramos diarios para ninos mayores de 2 anos.",
           tiempo_lectura: "5 min lectura",
-          categoria: "Nutricion",
+          categoria_id: "1",
           imagen_url: null,
           created_at: new Date().toISOString()
         },
@@ -300,7 +360,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
           descripcion: "Muchos productos dirigidos a ninos contienen cantidades alarmantes de azucar, sodio y aditivos quimicos.",
           contenido: "Los alimentos procesados se han convertido en una parte importante de la dieta infantil. Es crucial aprender a leer las etiquetas y elegir opciones mas saludables para nuestros hijos.",
           tiempo_lectura: "4 min lectura",
-          categoria: "Salud",
+          categoria_id: "2",
           imagen_url: null,
           created_at: new Date().toISOString()
         },
@@ -310,7 +370,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
           descripcion: "Aprende a identificar ingredientes nocivos y a tomar decisiones informadas en el supermercado.",
           contenido: "Saber leer las etiquetas nutricionales es una habilidad esencial para cualquier padre. Aprende a identificar el azucar oculto bajo diferentes nombres y a comparar productos de manera efectiva.",
           tiempo_lectura: "6 min lectura",
-          categoria: "Educacion",
+          categoria_id: "8",
           imagen_url: null,
           created_at: new Date().toISOString()
         },
@@ -320,7 +380,7 @@ export async function getArticulosInformativos(): Promise<{ data: ArticuloInform
           descripcion: "Descubre opciones nutritivas que les encantaran a tus hijos sin comprometer su salud.",
           contenido: "Los snacks son una parte importante de la alimentacion infantil. Opta por frutas frescas, vegetales con hummus, frutos secos y yogur natural como alternativas saludables.",
           tiempo_lectura: "5 min lectura",
-          categoria: "Recetas",
+          categoria_id: "7",
           imagen_url: null,
           created_at: new Date().toISOString()
         }
@@ -335,16 +395,22 @@ export async function createArticuloInformativo(formData: {
   descripcion: string
   contenido: string
   tiempo_lectura: string
-  categoria: string
+  categoria_id: string
 }): Promise<{ success: boolean; error: string | null }> {
   try {
     const supabase = await createServerSupabaseClient()
-    
+
     if (!supabase) {
       return { success: true, error: null }
     }
 
-    const { error } = await supabase.from("articulos_informativos").insert([formData])
+    const { error } = await supabase.from("articulos_informativos").insert([{
+      titulo: formData.titulo,
+      descripcion: formData.descripcion,
+      contenido: formData.contenido,
+      tiempo_lectura: formData.tiempo_lectura,
+      categoria_id: formData.categoria_id
+    }])
 
     if (error) throw error
     return { success: true, error: null }
@@ -361,7 +427,7 @@ export async function createArticuloInformativo(formData: {
 export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | null; error: string | null }> {
   try {
     const supabase = await createServerSupabaseClient()
-    
+
     const defaultRecetas: Receta[] = [
       {
         id: "1",
@@ -369,7 +435,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Un desayuno colorido y nutritivo que encantara a los ninos.",
         tiempo_preparacion: 10,
         porciones: 2,
-        categoria: "Desayuno",
+        tipo_comida: "Desayuno",
+        categoria_id: "7",
         imagen_url: "/smoothie-bowl-with-toppings.jpg",
         calificacion: 4.8,
         dificultad: "Facil",
@@ -383,7 +450,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Un desayuno balanceado con avena, frutas frescas y miel natural.",
         tiempo_preparacion: 15,
         porciones: 4,
-        categoria: "Desayuno",
+        tipo_comida: "Desayuno",
+        categoria_id: "7",
         imagen_url: "/breakfast-bowl-with-fruits-and-nuts.jpg",
         calificacion: 5.0,
         dificultad: "Facil",
@@ -397,7 +465,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Una ensalada fresca y colorida perfecta para el almuerzo.",
         tiempo_preparacion: 20,
         porciones: 4,
-        categoria: "Almuerzo",
+        tipo_comida: "Almuerzo",
+        categoria_id: "7",
         imagen_url: "/colorful-vegetable-salad.jpg",
         calificacion: 4.9,
         dificultad: "Facil",
@@ -411,7 +480,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Tostadas de pan integral con aguacate cremoso.",
         tiempo_preparacion: 10,
         porciones: 2,
-        categoria: "Almuerzo",
+        tipo_comida: "Almuerzo",
+        categoria_id: "7",
         imagen_url: "/avocado-toast-on-whole-grain-bread.jpg",
         calificacion: 4.7,
         dificultad: "Facil",
@@ -425,7 +495,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Un plato de frutas frescas de temporada para la merienda.",
         tiempo_preparacion: 5,
         porciones: 1,
-        categoria: "Snack",
+        tipo_comida: "Snack",
+        categoria_id: "7",
         imagen_url: "/fresh-fruit-platter.png",
         calificacion: 4.6,
         dificultad: "Facil",
@@ -439,7 +510,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Vegetales asados con hierbas aromaticas para una cena saludable.",
         tiempo_preparacion: 30,
         porciones: 4,
-        categoria: "Cena",
+        tipo_comida: "Cena",
+        categoria_id: "7",
         imagen_url: "/roasted-vegetables.png",
         calificacion: 4.8,
         dificultad: "Media",
@@ -448,26 +520,26 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         created_at: new Date().toISOString()
       }
     ]
-    
+
     if (!supabase) {
       let filtered = defaultRecetas
       if (filtro && filtro !== "todos") {
         if (filtro === "<15 min") {
           filtered = defaultRecetas.filter(r => r.tiempo_preparacion < 15)
         } else {
-          filtered = defaultRecetas.filter(r => r.categoria === filtro)
+          filtered = defaultRecetas.filter(r => r.tipo_comida === filtro)
         }
       }
       return { data: filtered, error: null }
     }
 
     let query = supabase.from("recetas").select("*")
-    
+
     if (filtro && filtro !== "todos") {
       if (filtro === "<15 min") {
         query = query.lt("tiempo_preparacion", 15)
       } else {
-        query = query.eq("categoria", filtro)
+        query = query.eq("tipo_comida", filtro)
       }
     }
 
@@ -477,7 +549,6 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
     return { data: data || defaultRecetas, error: null }
   } catch (error) {
     console.error("[v0] Error fetching recetas:", error)
-    // Retornar datos de ejemplo en caso de error
     const defaultRecetas: Receta[] = [
       {
         id: "1",
@@ -485,7 +556,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Un desayuno colorido y nutritivo que encantara a los ninos.",
         tiempo_preparacion: 10,
         porciones: 2,
-        categoria: "Desayuno",
+        tipo_comida: "Desayuno",
+        categoria_id: "7",
         imagen_url: "/smoothie-bowl-with-toppings.jpg",
         calificacion: 4.8,
         dificultad: "Facil",
@@ -499,7 +571,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Un desayuno balanceado con avena, frutas frescas y miel natural.",
         tiempo_preparacion: 15,
         porciones: 4,
-        categoria: "Desayuno",
+        tipo_comida: "Desayuno",
+        categoria_id: "7",
         imagen_url: "/breakfast-bowl-with-fruits-and-nuts.jpg",
         calificacion: 5.0,
         dificultad: "Facil",
@@ -513,7 +586,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Una ensalada fresca y colorida perfecta para el almuerzo.",
         tiempo_preparacion: 20,
         porciones: 4,
-        categoria: "Almuerzo",
+        tipo_comida: "Almuerzo",
+        categoria_id: "7",
         imagen_url: "/colorful-vegetable-salad.jpg",
         calificacion: 4.9,
         dificultad: "Facil",
@@ -527,7 +601,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Tostadas de pan integral con aguacate cremoso.",
         tiempo_preparacion: 10,
         porciones: 2,
-        categoria: "Almuerzo",
+        tipo_comida: "Almuerzo",
+        categoria_id: "7",
         imagen_url: "/avocado-toast-on-whole-grain-bread.jpg",
         calificacion: 4.7,
         dificultad: "Facil",
@@ -541,7 +616,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Un plato de frutas frescas de temporada para la merienda.",
         tiempo_preparacion: 5,
         porciones: 1,
-        categoria: "Snack",
+        tipo_comida: "Snack",
+        categoria_id: "7",
         imagen_url: "/fresh-fruit-platter.png",
         calificacion: 4.6,
         dificultad: "Facil",
@@ -555,7 +631,8 @@ export async function getRecetas(filtro?: string): Promise<{ data: Receta[] | nu
         descripcion: "Vegetales asados con hierbas aromaticas para una cena saludable.",
         tiempo_preparacion: 30,
         porciones: 4,
-        categoria: "Cena",
+        tipo_comida: "Cena",
+        categoria_id: "7",
         imagen_url: "/roasted-vegetables.png",
         calificacion: 4.8,
         dificultad: "Media",
@@ -573,20 +650,29 @@ export async function createReceta(formData: {
   descripcion: string
   tiempo_preparacion: number
   porciones: number
-  categoria: "Desayuno" | "Almuerzo" | "Cena" | "Snack"
+  tipo_comida: "Desayuno" | "Almuerzo" | "Cena" | "Snack"
+  categoria_id: string
   imagen_url?: string
   ingredientes?: string
   instrucciones?: string
 }): Promise<{ success: boolean; error: string | null }> {
   try {
     const supabase = await createServerSupabaseClient()
-    
+
     if (!supabase) {
       return { success: true, error: null }
     }
 
     const { error } = await supabase.from("recetas").insert([{
-      ...formData,
+      titulo: formData.titulo,
+      descripcion: formData.descripcion,
+      tiempo_preparacion: formData.tiempo_preparacion,
+      porciones: formData.porciones,
+      tipo_comida: formData.tipo_comida,
+      categoria_id: formData.categoria_id,
+      imagen_url: formData.imagen_url || "/placeholder.jpg",
+      ingredientes: formData.ingredientes,
+      instrucciones: formData.instrucciones,
       calificacion: 4.5,
       dificultad: "Facil"
     }])

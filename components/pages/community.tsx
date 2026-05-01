@@ -95,18 +95,32 @@ export default function Community() {
               <Input type="number" placeholder="15" />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Tipo de Comida</label>
               <select className="w-full border border-border rounded-lg px-3 py-2">
                 <option>Desayuno</option>
                 <option>Almuerzo</option>
-                <option>Cenas</option>
-                <option>Snacks</option>
+                <option>Cena</option>
+                <option>Snack</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Porciones</label>
               <Input type="number" placeholder="4" />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+            <select className="w-full border border-border rounded-lg px-3 py-2">
+              <option value="">Seleccionar categoría...</option>
+              <option>Nutricion Infantil</option>
+              <option>Obesidad Infantil</option>
+              <option>Habitos Saludables</option>
+              <option>Lactancia</option>
+              <option>Vitaminas y Nutrientes</option>
+              <option>Testimonios</option>
+              <option>Recetas Saludables</option>
+              <option>Educacion Alimentaria</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Ingredientes</label>

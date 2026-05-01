@@ -2,11 +2,12 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { createTestimonial } from "@/app/actions/testimonials"
+import { getCategorias, type Categoria } from "@/app/actions/content"
 
 interface Testimonial {
   name: string
@@ -30,9 +31,19 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
   const [rating, setRating] = useState(5)
   const [story, setStory] = useState("")
   const [achievement, setAchievement] = useState("")
+  const [categoriaId, setCategoriaId] = useState("")
+  const [categorias, setCategorias] = useState<Categoria[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      getCategorias().then((res) => {
+        if (res.data) setCategorias(res.data)
+      })
+    }
+  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,6 +53,7 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
     if (!childName.trim()) newErrors.childName = "El nombre del niño es requerido"
     if (!story.trim()) newErrors.story = "La historia es requerida"
     if (!achievement.trim()) newErrors.achievement = "El logro es requerido"
+    if (!categoriaId) newErrors.categoria = "Debes seleccionar una categoría"
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -65,20 +77,20 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
         quote: story,
         rating: rating,
         achievement: achievement,
+        categoria_id: categoriaId,
       })
 
       onSubmit(newTestimonial)
       setSuccess(true)
 
-      // Limpiar formulario
       setGuardianName("")
       setChildName("")
       setStory("")
       setAchievement("")
+      setCategoriaId("")
       setRating(5)
       setErrors({})
 
-      // Cerrar después de 2 segundos
       setTimeout(() => {
         onClose()
         setSuccess(false)
@@ -113,7 +125,6 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Guardian Name */}
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">Nombre del Acudiente</label>
               <input
@@ -127,7 +138,6 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
               {errors.guardianName && <p className="text-red-500 text-sm mt-1">{errors.guardianName}</p>}
             </div>
 
-            {/* Guardian Role and Child Name */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-2">Relación</label>
@@ -158,7 +168,24 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
               </div>
             </div>
 
-            {/* Star Rating */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">Categoría</label>
+              <select
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                disabled={isLoading}
+              >
+                <option value="">Seleccionar categoría...</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.nombre}
+                  </option>
+                ))}
+              </select>
+              {errors.categoria && <p className="text-red-500 text-sm mt-1">{errors.categoria}</p>}
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-3">¿Cuán útil fue tu experiencia?</label>
               <div className="flex gap-2">
@@ -176,7 +203,6 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
               </div>
             </div>
 
-            {/* Story/Comment */}
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">Tu Historia</label>
               <textarea
@@ -190,7 +216,6 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
               {errors.story && <p className="text-red-500 text-sm mt-1">{errors.story}</p>}
             </div>
 
-            {/* Achievement */}
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">Logro o Resultado Alcanzado</label>
               <input
@@ -204,14 +229,12 @@ export function ShareStoryModal({ isOpen, onClose, onSubmit }: ShareStoryModalPr
               {errors.achievement && <p className="text-red-500 text-sm mt-1">{errors.achievement}</p>}
             </div>
 
-            {/* Submit Error */}
             {errors.submit && (
               <div className="p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
                 {errors.submit}
               </div>
             )}
 
-            {/* Buttons */}
             <div className="flex gap-4 pt-4 border-t border-gray-200">
               <Button
                 type="button"

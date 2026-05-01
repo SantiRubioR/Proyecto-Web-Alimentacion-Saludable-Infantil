@@ -5,13 +5,15 @@ import { AlertCircle, Play, FileText, Plus, X, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { 
-  getVideosEducativos, 
-  getArticulosInformativos, 
-  createVideoEducativo, 
+import {
+  getVideosEducativos,
+  getArticulosInformativos,
+  createVideoEducativo,
   createArticuloInformativo,
+  getCategorias,
   type VideoEducativo,
-  type ArticuloInformativo
+  type ArticuloInformativo,
+  type Categoria
 } from "@/app/actions/content"
 
 interface AlertsProps {
@@ -30,7 +32,8 @@ export default function Alerts({ onNavigate }: AlertsProps) {
   const [contentType, setContentType] = useState<"video" | "articulo">("video")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Form states
+  const [categorias, setCategorias] = useState<Categoria[]>([])
+
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
@@ -38,13 +41,16 @@ export default function Alerts({ onNavigate }: AlertsProps) {
     tipo_autor: "Nutricionista" as "Nutricionista" | "Pediatra",
     duracion: "",
     youtube_url: "",
-    categoria: "",
+    categoria_id: "",
     contenido: "",
     tiempo_lectura: ""
   })
 
   useEffect(() => {
     loadContent()
+    getCategorias().then((res) => {
+      if (res.data) setCategorias(res.data)
+    })
   }, [])
 
   async function loadContent() {
@@ -72,7 +78,7 @@ export default function Alerts({ onNavigate }: AlertsProps) {
           tipo_autor: formData.tipo_autor,
           duracion: formData.duracion,
           youtube_url: formData.youtube_url,
-          categoria: formData.categoria
+          categoria_id: formData.categoria_id
         })
       } else {
         await createArticuloInformativo({
@@ -80,7 +86,7 @@ export default function Alerts({ onNavigate }: AlertsProps) {
           descripcion: formData.descripcion,
           contenido: formData.contenido,
           tiempo_lectura: formData.tiempo_lectura,
-          categoria: formData.categoria
+          categoria_id: formData.categoria_id
         })
       }
 
@@ -92,7 +98,7 @@ export default function Alerts({ onNavigate }: AlertsProps) {
         tipo_autor: "Nutricionista",
         duracion: "",
         youtube_url: "",
-        categoria: "",
+        categoria_id: "",
         contenido: "",
         tiempo_lectura: ""
       })
@@ -354,12 +360,18 @@ export default function Alerts({ onNavigate }: AlertsProps) {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                        <Input
-                          value={formData.categoria}
-                          onChange={(e) => setFormData({...formData, categoria: e.target.value})}
-                          placeholder="Ej: Educacion"
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
+                        <select
+                          required
+                          className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                          value={formData.categoria_id}
+                          onChange={(e) => setFormData({...formData, categoria_id: e.target.value})}
+                        >
+                          <option value="">Seleccionar categoría...</option>
+                          {categorias.map((cat) => (
+                            <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
 
@@ -399,12 +411,18 @@ export default function Alerts({ onNavigate }: AlertsProps) {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                        <Input
-                          value={formData.categoria}
-                          onChange={(e) => setFormData({...formData, categoria: e.target.value})}
-                          placeholder="Ej: Nutricion"
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
+                        <select
+                          required
+                          className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                          value={formData.categoria_id}
+                          onChange={(e) => setFormData({...formData, categoria_id: e.target.value})}
+                        >
+                          <option value="">Seleccionar categoría...</option>
+                          {categorias.map((cat) => (
+                            <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </>

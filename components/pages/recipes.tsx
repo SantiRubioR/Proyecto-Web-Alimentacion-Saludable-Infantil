@@ -5,7 +5,7 @@ import { Search, Filter, Heart, Clock, Users, Plus, X, ArrowLeft, Star } from "l
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { getRecetas, createReceta, type Receta } from "@/app/actions/content"
+import { getRecetas, createReceta, getCategorias, type Receta, type Categoria } from "@/app/actions/content"
 
 export default function Recipes() {
   const [recetas, setRecetas] = useState<Receta[]>([])
@@ -17,12 +17,15 @@ export default function Recipes() {
   const [selectedRecipe, setSelectedRecipe] = useState<Receta | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [categorias, setCategorias] = useState<Categoria[]>([])
+
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
     tiempo_preparacion: 15,
     porciones: 4,
-    categoria: "Desayuno" as "Desayuno" | "Almuerzo" | "Cena" | "Snack",
+    tipo_comida: "Desayuno" as "Desayuno" | "Almuerzo" | "Cena" | "Snack",
+    categoria_id: "",
     imagen_url: "",
     ingredientes: "",
     instrucciones: ""
@@ -32,6 +35,9 @@ export default function Recipes() {
 
   useEffect(() => {
     loadRecetas()
+    getCategorias().then((res) => {
+      if (res.data) setCategorias(res.data)
+    })
   }, [activeFilter])
 
   async function loadRecetas() {
@@ -57,7 +63,8 @@ export default function Recipes() {
         descripcion: formData.descripcion,
         tiempo_preparacion: formData.tiempo_preparacion,
         porciones: formData.porciones,
-        categoria: formData.categoria,
+        tipo_comida: formData.tipo_comida,
+        categoria_id: formData.categoria_id,
         imagen_url: formData.imagen_url || "/placeholder.jpg",
         ingredientes: formData.ingredientes,
         instrucciones: formData.instrucciones
@@ -69,7 +76,8 @@ export default function Recipes() {
         descripcion: "",
         tiempo_preparacion: 15,
         porciones: 4,
-        categoria: "Desayuno",
+        tipo_comida: "Desayuno",
+        categoria_id: "",
         imagen_url: "",
         ingredientes: "",
         instrucciones: ""
@@ -103,10 +111,10 @@ export default function Recipes() {
   const featuredRecipe = recetas.find(r => r.calificacion >= 4.9) || recetas[0]
 
   const categoryCounts = {
-    Desayuno: recetas.filter(r => r.categoria === "Desayuno").length || 24,
-    Almuerzo: recetas.filter(r => r.categoria === "Almuerzo").length || 32,
-    Cena: recetas.filter(r => r.categoria === "Cena").length || 28,
-    Snack: recetas.filter(r => r.categoria === "Snack").length || 41
+    Desayuno: recetas.filter(r => r.tipo_comida === "Desayuno").length || 24,
+    Almuerzo: recetas.filter(r => r.tipo_comida === "Almuerzo").length || 32,
+    Cena: recetas.filter(r => r.tipo_comida === "Cena").length || 28,
+    Snack: recetas.filter(r => r.tipo_comida === "Snack").length || 41
   }
 
   if (loading && recetas.length === 0) {
@@ -273,11 +281,11 @@ export default function Recipes() {
                     <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                     <span className="text-sm font-semibold text-gray-700">{recipe.calificacion}</span>
                   </div>
-                  <div className="absolute top-2 left-2">
-                    <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full">
-                      {recipe.categoria}
-                    </span>
-                  </div>
+                   <div className="absolute top-2 left-2">
+                     <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full">
+                       {recipe.tipo_comida}
+                     </span>
+                   </div>
                 </div>
                 <div className="p-4">
                   <span className="text-xs text-gray-500 font-medium">{recipe.dificultad}</span>
@@ -393,18 +401,34 @@ export default function Recipes() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
-                  <select
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm"
-                    value={formData.categoria}
-                    onChange={(e) => setFormData({...formData, categoria: e.target.value as "Desayuno" | "Almuerzo" | "Cena" | "Snack"})}
-                  >
-                    <option value="Desayuno">Desayuno</option>
-                    <option value="Almuerzo">Almuerzo</option>
-                    <option value="Cena">Cena</option>
-                    <option value="Snack">Snack</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Comida *</label>
+                    <select
+                      className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                      value={formData.tipo_comida}
+                      onChange={(e) => setFormData({...formData, tipo_comida: e.target.value as "Desayuno" | "Almuerzo" | "Cena" | "Snack"})}
+                    >
+                      <option value="Desayuno">Desayuno</option>
+                      <option value="Almuerzo">Almuerzo</option>
+                      <option value="Cena">Cena</option>
+                      <option value="Snack">Snack</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
+                    <select
+                      required
+                      className="w-full border border-gray-300 rounded-lg p-2 text-sm"
+                      value={formData.categoria_id}
+                      onChange={(e) => setFormData({...formData, categoria_id: e.target.value})}
+                    >
+                      <option value="">Seleccionar categoría...</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div>
@@ -483,7 +507,7 @@ export default function Recipes() {
                 />
                 <div className="flex gap-2 mt-4">
                   <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-medium">
-                    {selectedRecipe.categoria}
+                    {selectedRecipe.tipo_comida}
                   </span>
                   <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">
                     {selectedRecipe.dificultad}
